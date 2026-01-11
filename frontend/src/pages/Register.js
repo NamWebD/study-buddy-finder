@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 function Register({ setUser }) {
   const [formData, setFormData] = useState({
@@ -13,7 +14,7 @@ function Register({ setUser }) {
     e.preventDefault();
     try {
       const subjectsArray = formData.subjects.split(',').map(s => s.trim());
-      const res = await axios.post('/api/auth/register', {
+      const res = await axios.post(`${config.API_URL}/api/auth/register`, {
         ...formData,
         subjects: subjectsArray
       });

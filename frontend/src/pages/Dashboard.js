@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 function Dashboard({ user }) {
   const [buddies, setBuddies] = useState([]);
@@ -15,7 +16,7 @@ function Dashboard({ user }) {
 
   const fetchBuddies = async () => {
     try {
-      const res = await axios.get('/api/buddies', { params: filter });
+      const res = await axios.get(`${config.API_URL}/api/buddies`, { params });
       setBuddies(res.data);
     } catch (err) {
       console.error(err);
@@ -25,7 +26,7 @@ function Dashboard({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/buddies', { ...formData, userId: user.id });
+      await axios.post(`${config.API_URL}/api/buddies`, { ...formData, userId: user.id });
       setFormData({ subject: '', description: '', location: user.location, availability: '' });
       setShowForm(false);
       fetchBuddies();
@@ -36,7 +37,7 @@ function Dashboard({ user }) {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/api/buddies/${id}`);
+      await axios.delete(`${config.API_URL}/api/buddies/${id}`);
       fetchBuddies();
     } catch (err) {
       console.error(err);
