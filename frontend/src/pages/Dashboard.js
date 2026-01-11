@@ -14,8 +14,11 @@ function Dashboard({ user }) {
     fetchBuddies();
   }, []);
 
-  const fetchBuddies = async () => {
+  const fetchBuddies = async (searchFilter = filter) => {
     try {
+      const params = {};
+      if (searchFilter.subject) params.subject = searchFilter.subject;
+      if (searchFilter.location) params.location = searchFilter.location;
       const res = await axios.get(`${config.API_URL}/api/buddies`, { params });
       setBuddies(res.data);
     } catch (err) {
@@ -44,7 +47,12 @@ function Dashboard({ user }) {
     }
   };
 
-  return (
+   const handleClearFilters = () => {
+    setFilter({ subject: '', location: '' });
+    fetchBuddies({ subject: '', location: '' });
+  };
+
+    return (
     <div style={styles.container}>
       <h1>Study Buddy Dashboard</h1>
       
@@ -63,7 +71,8 @@ function Dashboard({ user }) {
           onChange={(e) => setFilter({...filter, location: e.target.value})}
           style={styles.input}
         />
-        <button onClick={fetchBuddies} style={styles.filterBtn}>Search</button>
+        <button onClick={() => fetchBuddies(filter)} style={styles.filterBtn}>Search</button>
+        <button onClick={handleClearFilters} style={styles.clearBtn}>Clear</button>
       </div>
 
       <button onClick={() => setShowForm(!showForm)} style={styles.addBtn}>
@@ -107,21 +116,25 @@ function Dashboard({ user }) {
       )}
 
       <div style={styles.buddyList}>
-        {buddies.map(buddy => (
-          <div key={buddy._id} style={styles.card}>
-            <h3>{buddy.subject}</h3>
-            <p>{buddy.description}</p>
-            <p><strong>📍 Location:</strong> {buddy.location}</p>
-            <p><strong>⏰ Availability:</strong> {buddy.availability}</p>
-            <p><strong>👤 Posted by:</strong> {buddy.userId.name}</p>
-            <p><strong>📧 Contact:</strong> {buddy.userId.email}</p>
-            {buddy.userId._id === user.id && (
-              <button onClick={() => handleDelete(buddy._id)} style={styles.deleteBtn}>
-                Delete
-              </button>
-            )}
-          </div>
-        ))}
+        {buddies.length === 0 ? (
+          <p style={styles.noResults}>No study buddies found. Try adjusting your filters or create a post!</p>
+        ) : (
+          buddies.map(buddy => (
+            <div key={buddy._id} style={styles.card}>
+              <h3>{buddy.subject}</h3>
+              <p>{buddy.description}</p>
+              <p><strong>📍 Location:</strong> {buddy.location}</p>
+              <p><strong>⏰ Availability:</strong> {buddy.availability}</p>
+              <p><strong>👤 Posted by:</strong> {buddy.userId.name}</p>
+              <p><strong>📧 Contact:</strong> {buddy.userId.email}</p>
+              {buddy.userId._id === user.id && (
+                <button onClick={() => handleDelete(buddy._id)} style={styles.deleteBtn}>
+                  Delete
+                </button>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
