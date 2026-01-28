@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -29,6 +30,19 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Serve frontend build and add SPA fallback(for direct reloads / deep links)
+const buildPath = path.join(__dirname, '..', 'frontend', 'build');
+const fs = require('fs');
+if(fs.existsSync(buildPath)) {
+  app.use(express.static(buildPath));
+  app.get('*', (req, res) => {
+    if(req.originalUrl.startsWith('/api/')) {
+      return res.status(404).json({ error: "Not Found" });
+    }
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
